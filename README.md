@@ -1,2 +1,2 @@
-# TPT-Bristol
-Automated Triple Pulse Test (TPT) for large-signal, in-situ characterization of power magnetics
+# tpt
+Code for the Teensy / Computer application for core losses measurement following the TPT method.
