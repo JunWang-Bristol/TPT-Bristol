@@ -6,4 +6,16 @@ picosdk
 matplotlib
 scipy
 pandas
-dash
+
+# TPT Studio (GUI) - the engine itself needs none of these
+PySide6-Essentials>=6.6
+pyqtgraph>=0.13
+
+# MAS schema validation (opentpt validate-dataset)
+jsonschema>=4.18
+
+# Catalogue core geometry + the datasheet fields MAS requires but the
+# bench cannot measure. Optional: without it the engine falls back to a
+# built-in geometry table and emits a partial MAS document.
+PyOpenMagnetics>=1.6
+

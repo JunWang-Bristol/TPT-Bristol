@@ -1,0 +1,103 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/core/shape.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "core/shape",
+    "description": "A shape for the magnetic cores",
+    "type": "object",
+    "properties": {
+        "type": {
+            "description": "The type of a magnetic shape",
+            "type": "string",
+            "enum": [
+                "standard",
+                "custom"
+            ]
+        },
+        "family": {
+            "description": "The family of a magnetic shape",
+            "title": "CoreShapeFamily",
+            "type": "string",
+            "enum": [
+                "u",
+                "ur",
+                "e",
+                "etd",
+                "p",
+                "rm",
+                "ep",
+                "epx",
+                "lp",
+                "pm",
+                "el",
+                "er",
+                "pq",
+                "efd",
+                "elp",
+                "planarE",
+                "planarER",
+                "planarEL",
+                "ec",
+                "eq",
+                "ui",
+                "pqi",
+                "ut",
+                "t",
+                "drum",
+                "drumRing",
+                "drumSemishielded",
+                "molded",
+                "rod",
+                "ei",
+                "h",
+                "c",
+                "eer",
+                "epc",
+                "epq",
+                "epw",
+                "ept",
+                "lep",
+                "ef",
+                "rs",
+                "ds",
+                "hs",
+                "block"
+            ]
+        },
+        "magneticCircuit": {
+            "description": "Describes if the magnetic circuit of the shape is open, and can be combined with others; or closed, and has to be used by itself",
+            "type": "string",
+            "enum": [
+                "open",
+                "closed"
+            ]
+        },
+        "name": {
+            "description": "The name of a magnetic shape",
+            "type": "string"
+        },
+        "aliases": {
+            "description": "Alternative names of a magnetic shape",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "familySubtype": {
+            "description": "The subtype of the shape, in case there are more than one",
+            "type": "string"
+        },
+        "dimensions": {
+            "description": "The dimensions of a magnetic shape. Keys are the dimension labels defined in IEC 62317 (and the modernised IEC 63093 series for planar cores).",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "../../utils.json#/$defs/dimension"
+            }
+        }
+    },
+    "required": [
+        "type",
+        "family"
+    ],
+    "additionalProperties": false
+}

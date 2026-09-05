@@ -1,0 +1,49 @@
+{
+  "name": "tx26_3c90_coreloss",
+  "hardware_configuration": "hardware_configuration.json",
+
+  "_comment": "Core-loss-only recipe, for the Core Loss build of TPT Studio. The full tx26_3c90.recipe.json also runs permeability, L(I), saturation and demagnetize blocks; this build refuses those, so this file is the one to open in the GUI. Both run identically under 'python -m opentpt run'.",
+
+  "dut": {
+    "shape": "TX26/15/10",
+    "material": "3C90",
+    "N1": 10,
+    "N2": 10,
+    "L_estimate_H": 404e-6,
+    "temperature_C": 25.0
+  },
+
+  "procedures": [
+    {
+      "type": "core_loss_map",
+      "label": "3C90 loss map",
+      "frequency_Hz": [25e3, 50e3, 100e3],
+      "B_peak_T": [0.05, 0.10, 0.20],
+      "dc_bias_A": [0.0, 0.10, 0.20],
+      "duty": [0.5]
+    }
+  ],
+
+  "qc": {
+    "max_imbalance_pct": 5.0,
+    "max_ipp_ratio": 3.0,
+    "min_vpri_fraction": 0.5,
+    "retries": 3
+  },
+
+  "limits": {
+    "psu_max_V": 30.0,
+    "psu_min_V": 0.0,
+    "i_limit_A": 2.0,
+    "f_min_Hz": 1e3,
+    "f_max_Hz": 200e3,
+    "deadtime_s": 500e-9
+  },
+
+  "export": {
+    "format": "MAS coreMaterial + outputs",
+    "origin": "measurement",
+    "directory": "datasets",
+    "save_waveforms": true
+  }
+}

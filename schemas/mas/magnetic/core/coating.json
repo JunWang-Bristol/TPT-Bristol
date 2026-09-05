@@ -1,0 +1,44 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/core/coating.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "core/coating",
+    "description": "Data describing the insulating coating applied to a magnetic core",
+    "type": "object",
+    "properties": {
+        "type": {
+            "description": "The type of coating material applied to the core",
+            "title": "coatingType",
+            "type": "string",
+            "enum": [
+                "epoxy",
+                "parylene",
+                "nylon",
+                "glass",
+                "magneticEpoxy"
+            ]
+        },
+        "thickness": {
+            "description": "Thickness of the coating, in m",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "material": {
+            "description": "Material of the coating, providing its relative permittivity and dielectric strength",
+            "title": "InsulationMaterialDataOrNameUnion",
+            "oneOf": [
+                {
+                    "$ref": "../insulation/material.json"
+                },
+                {
+                    "description": "The name of the material used in the insulation",
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "thickness"
+    ],
+    "additionalProperties": false
+}

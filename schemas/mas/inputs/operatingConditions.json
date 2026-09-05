@@ -1,0 +1,33 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/operatingConditions.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "operatingConditions",
+    "description": "The description of a magnetic operating conditions. Cooling uses the standardized PEAS cooling type (shared across all component families).",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "A label that identifies this Operating Conditions",
+            "type": "string"
+        },
+        "ambientTemperature": {
+            "description": "Temperature of the ambient where the magnetic will operate",
+            "type": "number",
+            "minimum": -273.15
+        },
+        "ambientRelativeHumidity": {
+            "description": "Relative Humidity of the ambient where the magnetic will operate",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+        },
+        "cooling": {
+            "description": "Cooling method for the magnetic component.",
+            "$ref": "https://psma.com/peas/utils.json#/$defs/cooling"
+        }
+    },
+    "required": [
+        "ambientTemperature"
+    ],
+    "additionalProperties": false
+}

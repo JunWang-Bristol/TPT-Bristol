@@ -1,0 +1,49 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/wire/litz.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "$ref": "./basicWire.json",
+    "title": "wire/litz",
+    "description": "The description of a stranded litz magnet wire Discriminator: this file matches ONLY documents with type='litz' (enforced by the if/required/else:false conditional, which stays invisible to code generators so the shared wireType enum keeps generating as WireType).",
+    "type": "object",
+    "properties": {
+        "strand": {
+            "description": "The wire used as strands",
+            "oneOf": [
+                {
+                    "title": "wireRound",
+                    "$ref": "./round.json"
+                },
+                {
+                    "description": "The name of the wire used as strand",
+                    "type": "string"
+                }
+            ]
+        },
+        "outerDiameter": {
+            "description": "The outer diameter of the wire. Unit: m.",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "twistPitch": {
+            "description": "Length of one full twist of the litz bundle along the wire axis. Unit: m. Vendors quote this in mm or as 'lay length'; convert to metres before serialisation. No international standard exists for litz construction; this field captures the most commonly published vendor parameter.",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        }
+    },
+    "required": [
+        "strand",
+        "outerDiameter"
+    ],
+    "unevaluatedProperties": false,
+    "if": {
+        "properties": {
+            "type": {
+                "const": "litz"
+            }
+        },
+        "required": [
+            "type"
+        ]
+    },
+    "then": true,
+    "else": false
+}

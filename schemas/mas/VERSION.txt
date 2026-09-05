@@ -1,0 +1,17 @@
+MAS JSON schema, vendored for offline validation.
+
+source:  https://github.com/OpenMagnetics/MAS  (schemas/ subtree)
+commit:  5b03f31292
+fetched: 2026-08-06
+license: Apache-2.0 (see LICENSE.md in this directory)
+
+NOTE: MAS $refs a sibling spec, PEAS, which is NOT part of the MAS repo.
+The MAS project's own scripts/validate-samples.py builds its registry from
+("schemas", "../PEAS/schemas"), i.e. a PEAS checkout beside MAS.  Without it,
+four URI prefixes are unresolvable:
+    https://psma.com/peas/utils.json
+    https://psma.com/peas/inputs/operatingPointExcitation.json
+    https://psma.com/peas/outputs/insulationCoordination.json
+    https://psma.com/peas/outputs/lossElementPerHarmonic.json
+opentpt.mas_schema stubs those and reports which subtrees went unchecked.
+Pass --peas <dir> to validate completely.

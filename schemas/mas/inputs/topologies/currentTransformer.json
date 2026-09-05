@@ -1,0 +1,48 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/currentTransformer.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "currentTransformer",
+    "description": "The description of a Current Transformer excitation",
+    "type": "object",
+    "properties": {
+        "waveformLabel": {
+            "description": "Waveform of the signal to measure",
+            "$ref": "https://psma.com/peas/inputs/operatingPointExcitation.json#/$defs/waveformLabel"
+        },
+        "maximumPrimaryCurrentPeak": {
+            "description": "The maximum current peak in the input",
+            "type": "number"
+        },
+        "frequency": {
+            "description": "Frequency of the input",
+            "type": "number"
+        },
+        "maximumDutyCycle": {
+            "description": "The maximum duty cycle in the input",
+            "type": "number"
+        },
+        "burdenResistor": {
+            "description": "The value of the burden resistor in the measuring circuit",
+            "type": "number"
+        },
+        "diodeVoltageDrop": {
+            "description": "The voltage drop on the diode",
+            "type": "number"
+        },
+        "ambientTemperature": {
+            "description": "The ambient temperature of the operating point",
+            "type": "number"
+        }
+    },
+    "required": [
+        "waveformLabel",
+        "maximumPrimaryCurrentPeak",
+        "frequency",
+        "maximumDutyCycle",
+        "burdenResistor",
+        "diodeVoltageDrop",
+        "ambientTemperature"
+    ],
+    "additionalProperties": false
+}

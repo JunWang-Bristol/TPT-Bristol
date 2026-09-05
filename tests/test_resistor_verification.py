@@ -10,6 +10,7 @@ Controls the BK9129B PSU to supply the DC bus voltage.
 
 import sys
 import os
+import json
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,8 +22,15 @@ from oscilloscopes.PicoScope import PicoScope2408B
 from power_supplies.BK import BK9129B
 
 # --- Configuration -----------------------------------------------------------
-BOARD_PORT = "COM3"
-PSU_PORT = "COM7"
+# Ports come from hardware_configuration.json so this script follows the rig
+# instead of drifting out of date with hardcoded COM numbers.
+_CONFIG_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), os.pardir, "hardware_configuration.json"))
+with open(_CONFIG_PATH) as _f:
+    _CONFIG = json.load(_f)
+
+BOARD_PORT = _CONFIG["board_port"]
+PSU_PORT = _CONFIG["power_supply_port"]
 R_LOAD = 220  # ohm
 
 # PSU: 5 V on channel 1, conservative current limit

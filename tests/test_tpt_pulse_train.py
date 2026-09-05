@@ -7,7 +7,7 @@ to the gate drivers.
 
 This script assumes:
   - The connected MCU is flashed with the TPT_SCPI_Server firmware
-  - CoolX600 voltage is controlled separately by a different MCU
+  - The DC rail voltage is set separately (this script only drives the pulses)
   - pyvisa and pyvisa-py (or NI-VISA) are installed
 
 Usage:
@@ -28,6 +28,7 @@ Before running:
 
 import sys
 import os
+import json
 import time
 
 import context  # noqa: F401 — adds src/ to sys.path212
@@ -36,7 +37,12 @@ from boards.ST import NUCLEO_H503RB
 
 
 # ============ CONFIGURATION ============
-SERIAL_PORT = "COM3"  # Update to match your port (e.g. "COM3" on Windows)
+# Port comes from hardware_configuration.json so this script follows the rig
+# instead of drifting out of date with a hardcoded COM number.
+_CONFIG_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), os.pardir, "hardware_configuration.json"))
+with open(_CONFIG_PATH) as _f:
+    SERIAL_PORT = json.load(_f)["board_port"]
 # =======================================
 
 

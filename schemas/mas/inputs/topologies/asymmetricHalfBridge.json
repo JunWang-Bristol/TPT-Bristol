@@ -1,0 +1,105 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/asymmetricHalfBridge.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "asymmetricHalfBridge",
+    "description": "The description of an Asymmetric Half-Bridge (AHB) converter (Imbertson-Mohan 1993): single-leg, two-switch isolated PWM converter with DC-blocking capacitor and complementary D/(1-D) drive.",
+    "type": "object",
+    "properties": {
+        "inputVoltage": {
+            "description": "The input voltage of the AHB converter",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "diodeVoltageDrop": {
+            "description": "The voltage drop of the rectifier diode (or SR FET drain-source drop)",
+            "type": "number",
+            "default": 0.6
+        },
+        "efficiency": {
+            "description": "The target efficiency",
+            "type": "number",
+            "default": 0.95
+        },
+        "rectifierType": {
+            "description": "The type of secondary rectifier",
+            "$ref": "#/$defs/ahbRectifierType"
+        },
+        "useLeakageInductance": {
+            "description": "Whether to use transformer leakage inductance for ZVS",
+            "type": "boolean",
+            "default": true
+        },
+        "leakageInductance": {
+            "description": "Optional explicit primary leakage inductance in henries",
+            "type": "number"
+        },
+        "magnetizingInductance": {
+            "description": "Optional explicit primary magnetizing inductance in henries",
+            "type": "number"
+        },
+        "outputInductance": {
+            "description": "Optional explicit output filter inductance in henries",
+            "type": "number"
+        },
+        "dcBlockingCapacitance": {
+            "description": "Optional explicit DC-blocking capacitance in farads",
+            "type": "number"
+        },
+        "maximumDutyCycle": {
+            "description": "Maximum duty cycle of Q1 (chosen branch of non-monotonic gain curve, conventionally <= 0.5)",
+            "type": "number",
+            "default": 0.5
+        },
+        "inputVoltageStepRange": {
+            "description": "Optional Vin step magnitude (in volts) used to compute worst-case transient flux excursion",
+            "type": "number"
+        },
+        "operatingPoints": {
+            "description": "A list of operating points",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/ahbOperatingPoint"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "inputVoltage",
+        "operatingPoints"
+    ],
+    "$defs": {
+        "ahbRectifierType": {
+            "description": "The type of secondary rectifier for the AHB",
+            "title": "ahbRectifierType",
+            "type": "string",
+            "enum": [
+                "centerTapped",
+                "currentDoubler",
+                "fullBridge",
+                "ahbFlyback"
+            ]
+        },
+        "ahbOperatingPoint": {
+            "description": "The description of one AHB operating point",
+            "title": "ahbOperatingPoint",
+            "allOf": [
+                {
+                    "$ref": "../../utils.json#/$defs/baseOperatingPoint"
+                }
+            ],
+            "properties": {
+                "dutyCycle": {
+                    "description": "Commanded duty cycle of Q1 for this operating point (0 < D <= 0.5 for the conventional non-monotonic gain branch). Schema bounds 0 <= D <= 1 to permit the upper-branch research configuration.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            },
+            "required": [
+                "dutyCycle"
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "additionalProperties": false
+}

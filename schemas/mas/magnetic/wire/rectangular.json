@@ -1,0 +1,48 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/wire/rectangular.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "$ref": "./basicWire.json",
+    "title": "wire/rectangular",
+    "description": "The description of a solid rectangular magnet wire Discriminator: this file matches ONLY documents with type='rectangular' (enforced by the if/required/else:false conditional, which stays invisible to code generators so the shared wireType enum keeps generating as WireType).",
+    "type": "object",
+    "properties": {
+        "conductingWidth": {
+            "description": "The conducting width of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "conductingHeight": {
+            "description": "The conducting height of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "edgeRadius": {
+            "description": "The radius of the edge, in case of rectangular wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "outerWidth": {
+            "description": "The outer width of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "outerHeight": {
+            "description": "The outer height of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        }
+    },
+    "required": [
+        "conductingWidth",
+        "conductingHeight"
+    ],
+    "unevaluatedProperties": false,
+    "if": {
+        "properties": {
+            "type": {
+                "const": "rectangular"
+            }
+        },
+        "required": [
+            "type"
+        ]
+    },
+    "then": true,
+    "else": false
+}

@@ -1,0 +1,37 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/wire.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "description": "The description of a magnet wire",
+    "oneOf": [
+        {
+            "$ref": "./wire/round.json"
+        },
+        {
+            "$ref": "./wire/foil.json"
+        },
+        {
+            "$ref": "./wire/rectangular.json"
+        },
+        {
+            "$ref": "./wire/litz.json"
+        },
+        {
+            "$ref": "./wire/planar.json"
+        }
+    ],
+    "$defs": {
+        "wireType": {
+            "description": "The type of wire",
+            "title": "wireType",
+            "type": "string",
+            "enum": [
+                "round",
+                "litz",
+                "rectangular",
+                "foil",
+                "planar"
+            ]
+        }
+    }
+}

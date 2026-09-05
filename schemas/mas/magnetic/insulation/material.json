@@ -1,0 +1,135 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/insulation/material.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "insulation/material",
+    "description": "A material for insulation",
+    "type": "object",
+    "properties": {
+        "composition": {
+            "description": "The composition of a insulation material",
+            "type": "string"
+        },
+        "name": {
+            "description": "The name of a insulation material",
+            "type": "string"
+        },
+        "aliases": {
+            "description": "Alternative names of the material",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "manufacturerInfo": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/manufacturerInfo"
+        },
+        "dielectricStrength": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/dielectricStrengthPoint"
+            },
+            "minItems": 1
+        },
+        "relativePermittivity": {
+            "description": "The dielectric constant of the insulation material",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "thermalConductivity": {
+            "description": "Thermal conductivity of the insulation material. Unit: W/(m*K).",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "specificHeat": {
+            "description": "Specific heat capacity of the insulation material. Unit: J/(kg*K).",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "temperatureClass": {
+            "description": "Insulation thermal class per IEC 60085. May be expressed as the IEC letter class (Y, A, E, B, F, H, N, R, 200, 220, 250) or as the numeric maximum continuous operating temperature in Celsius (the form printed on most magnet-wire spools and IEC 60317 sub-spec datasheets). The two forms are interchangeable per the IEC 60085 mapping. See docs/normative-references.md.",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "enum": [
+                        "Y",
+                        "A",
+                        "E",
+                        "B",
+                        "F",
+                        "H",
+                        "N",
+                        "R",
+                        "200",
+                        "220",
+                        "250"
+                    ]
+                },
+                {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                }
+            ]
+        },
+        "meltingPoint": {
+            "description": "The melting temperature of the insulation material, in Celsius",
+            "type": "number",
+            "exclusiveMinimum": 0
+        },
+        "resistivity": {
+            "description": "Volume resistivity per IEC 60093. Unit: ohm metre (Ohm.m).",
+            "type": "array",
+            "items": {
+                "$ref": "../../utils.json#/$defs/resistivityPoint"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "surfaceResistivity": {
+            "description": "Surface resistivity per IEC 60093. Unit: ohm per square (Ohm/sq). Relevant to tracking and creepage assessment per IEC 60112 / IEC 60664-1.",
+            "type": "array",
+            "items": {
+                "$ref": "../../utils.json#/$defs/resistivityPoint"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "required": [
+        "name",
+        "dielectricStrength"
+    ],
+    "$defs": {
+        "dielectricStrengthPoint": {
+            "description": "data for describing one point of dielectric strength",
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "Dielectric strength value, in V / m",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "thickness": {
+                    "description": "Thickness of the material",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "temperature": {
+                    "description": "Temperature for the field value, in Celsius.",
+                    "type": "number"
+                },
+                "humidity": {
+                    "description": "Humidity for the field value, in proportion over 1",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

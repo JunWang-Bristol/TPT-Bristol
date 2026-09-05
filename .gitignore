@@ -18,6 +18,13 @@ src/boards/NUCLEO-H503RB/firmware/build/
 
 # Vendored third-party SDKs / driver installers (install via requirements.txt or vendor sites)
 src/oscilloscopes/picosdk-python-wrappers/
+
+# Local scratch: files parked here are not part of the project (safe to delete)
+_local_scratch/
+
+# Measurement outputs produced by tools/ scripts
+*.csv
+*.png
 src/power_supplies/BK9129B/drivers/PL2303_Prolific_DriverInstaller_v1_12_0/
 src/power_supplies/BK9129B/drivers/*.zip
 
@@ -32,3 +39,12 @@ arm-toolchain.zip
 
 # KiCad lock files
 src/boards/ST2402/~ST2402.kicad_pcb.lck
+
+# PyInstaller
+build/
+dist/
+*.spec.bak
+
+# engine output
+datasets/
+

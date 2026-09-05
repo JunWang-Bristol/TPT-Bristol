@@ -17,7 +17,13 @@ extern "C" {
 #define SCPI_IDN1 "OPEN_TPT"
 #define SCPI_IDN2 "2402"
 #define SCPI_IDN3 "00000000"
-#define SCPI_IDN4 "0.1.0"
+/* Pulse-engine generation.  Bump the minor version when the pulse timing,
+ * deadtime handling or pin switching changes — anything a measurement could
+ * notice — and the patch version for fixes that leave the waveform identical.
+ * The engine's preflight only checks for "OPEN_TPT" in the IDN, so a board is
+ * usable across patch versions; the string is here so a dataset can record
+ * exactly which build produced it. */
+#define SCPI_IDN4 "0.2.1"
 
 extern scpi_command_t scpi_commands[];
 extern scpi_interface_t scpi_interface;

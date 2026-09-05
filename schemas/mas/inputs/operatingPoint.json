@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/operatingPoint.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "operatingPoint",
+    "description": "Data describing one operating point, including the operating conditions and the excitations for all ports",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "Name describing this operating point",
+            "type": "string"
+        },
+        "conditions": {
+            "title": "operatingConditions",
+            "$ref": "./operatingConditions.json"
+        },
+        "excitationsPerWinding": {
+            "title": "excitationsPerWinding",
+            "type": "array",
+            "items": {
+                "title": "OperatingPointExcitationPerWinding",
+                "description": "Data describing the excitation of the winding",
+                "$ref": "https://psma.com/peas/inputs/operatingPointExcitation.json"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "conditions",
+        "excitationsPerWinding"
+    ],
+    "$defs": {},
+    "additionalProperties": false
+}

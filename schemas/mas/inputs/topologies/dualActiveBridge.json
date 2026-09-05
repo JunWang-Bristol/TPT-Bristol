@@ -1,0 +1,87 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/dualActiveBridge.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "dualActiveBridge",
+    "description": "Dual Active Bridge (DAB) DC-DC converter excitation. Modulation parameters follow the standard Triple Phase Shift (TPS) convention: D1 = primary-bridge intra-leg shift, D2 = secondary-bridge intra-leg shift, D3 = inter-bridge (outer) shift. See Huang et al., Energies 11(9):2419 (2018) and Maniktala & Rosano, 'Power Supplies A to Z', 3rd ed. (Ch. 2).",
+    "type": "object",
+    "properties": {
+        "inputVoltage": {
+            "description": "The input voltage of the DAB converter",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "efficiency": {
+            "description": "The target efficiency",
+            "type": "number",
+            "default": 0.97
+        },
+        "seriesInductance": {
+            "description": "The series inductance for power transfer control. If 0, uses transformer leakage inductance",
+            "type": "number",
+            "default": 0
+        },
+        "useLeakageInductance": {
+            "description": "Whether to use transformer leakage inductance as the series inductor",
+            "type": "boolean",
+            "default": true
+        },
+        "perSecondaryLeakage": {
+            "description": "Optional per-secondary leakage inductance in H, one entry per output. Required for physically meaningful multi-output DAB simulation; if absent, all secondaries share the same series inductance.",
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "operatingPoints": {
+            "description": "A list of operating points",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/dabOperatingPoint"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "inputVoltage",
+        "operatingPoints"
+    ],
+    "$defs": {
+        "dabOperatingPoint": {
+            "description": "One DAB operating point. Modulation is parameterised by three phase-shift variables D1, D2, D3 (Huang et al. 2018 convention): D1 and D2 are intra-bridge (leg-to-leg) shifts that control each bridge's effective duty cycle, and D3 is the outer inter-bridge shift that controls power transfer. SPS uses D3 only (D1=D2=0). EPS uses D3 + one inner shift (D1, with D2=0). DPS uses D3 + one symmetric inner shift (D1=D2). TPS uses all three independently.",
+            "title": "dabOperatingPoint",
+            "allOf": [
+                {
+                    "$ref": "../../utils.json#/$defs/baseOperatingPoint"
+                }
+            ],
+            "properties": {
+                "modulationType": {
+                    "description": "DAB modulation scheme. SPS (only D3), EPS (D1>0, D2=0), DPS (D1=D2>0), TPS (independent). Ref: Huang et al., Energies 11(9):2419 (2018).",
+                    "type": "string",
+                    "enum": [
+                        "SPS",
+                        "EPS",
+                        "DPS",
+                        "TPS"
+                    ],
+                    "default": "SPS"
+                },
+                "innerPhaseShift1": {
+                    "description": "D1 in degrees",
+                    "type": "number"
+                },
+                "innerPhaseShift2": {
+                    "description": "D2 in degrees",
+                    "type": "number"
+                },
+                "innerPhaseShift3": {
+                    "description": "D3 in degrees",
+                    "type": "number"
+                }
+            },
+            "unevaluatedProperties": false
+        }
+    },
+    "additionalProperties": false
+}

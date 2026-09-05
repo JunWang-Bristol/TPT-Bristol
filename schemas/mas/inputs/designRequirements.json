@@ -1,0 +1,153 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/designRequirements.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "designRequirements",
+    "description": "The list of requirements that a given magnetic must comply with. Built on the shared PEAS designRequirementsBase (name, role, allowedTechnologies, market, topology, operatingTemperature, terminalType, maximumWeight, maximumDimensions, application, subApplication) plus the magnetic-specific requirements below. This makes MAS a PEAS citizen: a MAS designRequirements is also a valid PEAS designRequirementsBase.",
+    "allOf": [
+        {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/designRequirementsBase"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "magnetizingInductance": {
+                    "description": "Required values for the magnetizing inductance",
+                    "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                },
+                "turnsRatios": {
+                    "description": "Required turns ratios between primary and the rest of windings",
+                    "type": "array",
+                    "items": {
+                        "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                    },
+                    "minItems": 0
+                },
+                "minimumImpedance": {
+                    "description": "List of minimum impedance at given frequency in the primary",
+                    "type": "array",
+                    "items": {
+                        "$ref": "../utils.json#/$defs/impedanceAtFrequency"
+                    },
+                    "minItems": 1
+                },
+                "leakageInductance": {
+                    "description": "Required values for the leakage inductance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                    },
+                    "minItems": 0
+                },
+                "strayCapacitance": {
+                    "description": "Required values for the stray capacitance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                    },
+                    "minItems": 0
+                },
+                "isolationSides": {
+                    "description": "Isolation side where each winding is connected to.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "../utils.json#/$defs/isolationSide"
+                    },
+                    "minItems": 1
+                },
+                "insulation": {
+                    "title": "insulationRequirements",
+                    "type": "object",
+                    "properties": {
+                        "altitude": {
+                            "description": "Required values for the altitude",
+                            "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                        },
+                        "cti": {
+                            "description": "Required CTI",
+                            "type": "string",
+                            "enum": [
+                                "groupI",
+                                "groupII",
+                                "groupIIIA",
+                                "groupIIIB"
+                            ]
+                        },
+                        "pollutionDegree": {
+                            "description": "Required pollution for the magnetic to work under",
+                            "$ref": "https://psma.com/peas/utils.json#/$defs/pollutionDegree"
+                        },
+                        "overvoltageCategory": {
+                            "description": "Required overvoltage category",
+                            "type": "string",
+                            "enum": [
+                                "I",
+                                "II",
+                                "III",
+                                "IV"
+                            ]
+                        },
+                        "insulationType": {
+                            "$ref": "../utils.json#/$defs/insulationType"
+                        },
+                        "mainSupplyVoltage": {
+                            "description": "Voltage RMS of the main supply to which this transformer is connected to.",
+                            "$ref": "../utils.json#/$defs/dimensionWithTolerance"
+                        },
+                        "standards": {
+                            "description": "List of standards that will be taken into account for insulation.",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "title": "insulationStandards",
+                                "enum": [
+                                    "IEC 60664-1",
+                                    "IEC 61558-1",
+                                    "IEC 60335-1",
+                                    "IEC 62368-1"
+                                ]
+                            },
+                            "minItems": 1
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "wiringTechnology": {
+                    "$ref": "../utils.json#/$defs/wiringTechnology"
+                }
+            },
+            "required": [
+                "magnetizingInductance",
+                "turnsRatios"
+            ]
+        }
+    ],
+    "unevaluatedProperties": false,
+    "$defs": {
+        "impedancePoint": {
+            "description": "Data describing one impendance value",
+            "title": "impedancePoint",
+            "type": "object",
+            "properties": {
+                "magnitude": {
+                    "description": "Magnitude of the impedance, in Ohm",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "phase": {
+                    "type": "number"
+                },
+                "realPart": {
+                    "type": "number"
+                },
+                "imaginaryPart": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "magnitude"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

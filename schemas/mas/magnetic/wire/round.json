@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/wire/round.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "$ref": "./basicWire.json",
+    "title": "wire/round",
+    "description": "The description of a solid round magnet wire Discriminator: this file matches ONLY documents with type='round' (enforced by the if/required/else:false conditional, which stays invisible to code generators so the shared wireType enum keeps generating as WireType).",
+    "type": "object",
+    "properties": {
+        "material": {
+            "title": "WireMaterialDataOrNameUnion",
+            "oneOf": [
+                {
+                    "$ref": "./material.json"
+                },
+                {
+                    "description": "The name of the material used in the wire",
+                    "type": "string"
+                }
+            ]
+        },
+        "conductingDiameter": {
+            "description": "The conducting diameter of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "outerDiameter": {
+            "description": "The outer diameter of the wire, in m",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        }
+    },
+    "required": [
+        "conductingDiameter"
+    ],
+    "unevaluatedProperties": false,
+    "if": {
+        "properties": {
+            "type": {
+                "const": "round"
+            }
+        },
+        "required": [
+            "type"
+        ]
+    },
+    "then": true,
+    "else": false
+}

@@ -1,0 +1,56 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/isolatedBuckBoost.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "isolatedBuckBoost",
+    "description": "The description of a Isolated BuckBoost / FlyBuck - Boost converter excitation",
+    "type": "object",
+    "properties": {
+        "inputVoltage": {
+            "description": "The input voltage of the isolatedBuckBoost",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "diodeVoltageDrop": {
+            "description": "The voltage drop on the diode",
+            "type": "number"
+        },
+        "maximumSwitchCurrent": {
+            "description": "The maximum current that can go through the selected switch",
+            "type": "number"
+        },
+        "currentRippleRatio": {
+            "description": "The maximum current ripple allowed in the output",
+            "type": "number"
+        },
+        "efficiency": {
+            "description": "The target efficiency",
+            "type": "number",
+            "default": 1
+        },
+        "operatingPoints": {
+            "description": "A list of operating points",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/isolatedBuckBoostOperatingPoint"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "inputVoltage",
+        "diodeVoltageDrop",
+        "operatingPoints"
+    ],
+    "$defs": {
+        "isolatedBuckBoostOperatingPoint": {
+            "description": "The description of one isolatedBuckBoost operating point",
+            "title": "isolatedBuckBoostOperatingPoint",
+            "allOf": [
+                {
+                    "$ref": "../../utils.json#/$defs/baseOperatingPoint"
+                }
+            ]
+        }
+    },
+    "additionalProperties": false
+}

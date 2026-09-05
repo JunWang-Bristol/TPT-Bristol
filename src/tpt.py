@@ -128,15 +128,35 @@ def _is_clipped(arr, min_flat=5):
     return False
 
 
+def _smallest_range_fitting(scope, peak_volts, headroom=1.3):
+    """Smallest available scope range that fits ±peak_volts, with headroom.
+
+    PicoScope input ranges are ± full scale (NOT volts/div), so the signal
+    peak must fit inside the range itself.  Picking the smallest range that
+    still fits matters a lot on an 8-bit scope: the 2408B has only 256 codes
+    across the range, so a signal using 8% of full scale is resolved with
+    ~21 codes, while the same signal on a 5× smaller range gets ~106.
+
+    `peak_volts` is the signal at the BNC — convert from physical units by
+    dividing by the probe scale first (read_data multiplies by probe_scale).
+    """
+    needed = abs(peak_volts) * headroom
+    ranges = sorted(scope.get_input_voltage_ranges())
+    for r in ranges:
+        if r >= needed:
+            return r
+    return ranges[-1]
+
+
 # ─── Base class ───────────────────────────────────────────────────────────────
 
 class Measurement:
     """Open hardware connections and store probe-scale factors."""
 
-    # RTB2004 channel indices (0-based integers accepted by the driver)
-    CH_VOLTAGE   = 0   # CH1 — primary / input voltage  (50:1 probe)
-    CH_SECONDARY = 1   # CH2 — secondary winding        (10:1 probe, core loss)
-    CH_CURRENT   = 3   # CH4 — inductor current         (100 mV/A probe)
+    # PicoScope channel indices (0-based integers accepted by the driver)
+    CH_VOLTAGE   = 0   # CH A — primary / input voltage  (probe scale from config)
+    CH_SECONDARY = 1   # CH B — secondary winding        (probe scale from config)
+    CH_CURRENT   = 3   # CH D — inductor current         (probe scale from config)
 
     # GPP-4323 output channels — CH1 positive rail, CH2 negative rail
     PSU_CHANNEL     = 1
@@ -200,10 +220,26 @@ class Measurement:
 
     @classmethod
     def from_config(cls, config_path="hardware_configuration.json"):
-        """Instantiate from a JSON configuration file."""
+        """Instantiate from a JSON configuration file.
+
+        Keys this class does not take are IGNORED rather than fatal.  The file
+        is shared with the ``opentpt`` engine, which reads settings these older
+        classes know nothing about (``current_channel_skew_s`` was the first),
+        and ``cls(**cfg)`` turned every such addition into a TypeError that
+        broke every script here at import of the config — a failure with no
+        relation to what the script was doing.
+        """
+        import inspect
+
         with open(config_path) as f:
             cfg = json.load(f)
-        return cls(**cfg)
+        accepted = set(inspect.signature(cls.__init__).parameters) - {"self"}
+        known = {k: v for k, v in cfg.items() if k in accepted}
+        ignored = sorted(set(cfg) - accepted)
+        if ignored:
+            print(f"note: {cls.__name__} ignores config keys {ignored} "
+                  f"(the opentpt engine reads them)")
+        return cls(**known)
 
 
 # ─── Inductance measurement ───────────────────────────────────────────────────
@@ -234,15 +270,19 @@ class InductanceMeasurement(Measurement):
         """
         scope = self.scope
 
-        # Voltage scale: fit the supply voltage in ~4 divs with headroom for ringing
-        V_scale = max(0.5, voltage / 4.0)
+        # Voltage range: the DUT is driven to the full rail voltage, so the signal
+        # peaks at ~±voltage.  This is ± FULL SCALE, not volts/div.
+        V_probe = scope.probe_scale.get(self.CH_VOLTAGE, 1.0) or 1.0
+        V_scale = _smallest_range_fitting(scope, voltage / V_probe)
 
-        # Current scale: expected peak swing ΔI = V·T_half/L; add 50% headroom
-        if L_estimate is not None and L_estimate > 0:
-            delta_I = voltage * T_half / L_estimate
-            I_scale = max(0.05, delta_I * 0.75)
-        else:
-            I_scale = 0.5   # conservative fallback when L is unknown
+        # Current range: expected peak swing ΔI = V·T_half/L.  ΔI is in AMPS, so
+        # convert to the volts actually seen at the BNC (amps = volts × probe_scale)
+        # before choosing a range, then take the smallest range that fits.
+        cur_probe_scale = scope.probe_scale.get(self.CH_CURRENT, 1.0) or 1.0
+        I_peak = (voltage * T_half / L_estimate
+                  if L_estimate is not None and L_estimate > 0
+                  else 0.5)          # conservative fallback when L is unknown
+        I_scale = _smallest_range_fitting(scope, I_peak / cur_probe_scale)
 
         # Note: set_channel_configuration() overwrites channel_labels with the raw channel
         # integer argument.  Call set_channel_label() AFTER it to set the correct names.
@@ -493,9 +533,9 @@ class CoreLossMeasurement(Measurement):
 
     Hardware channels
     -----------------
-    CH1 (CH_VOLTAGE=0)   : primary voltage    (50:1 probe)
-    CH2 (CH_SECONDARY=1) : secondary winding  (10:1 probe)
-    CH3 (CH_CURRENT=2)   : primary current    (100 mV/A probe)
+    CH1 (CH_VOLTAGE=0)   : primary voltage    (probe scale from config)
+    CH2 (CH_SECONDARY=1) : secondary winding  (probe scale from config)
+    CH4 (CH_CURRENT=3)   : primary current    (probe scale from config)
 
     TPT burst structure — 8 half-periods total (even, balanced net flux)
     ----------------------------------------------------------------------
@@ -528,17 +568,22 @@ class CoreLossMeasurement(Measurement):
         # Set probe scale for secondary channel (not set by Measurement.__init__)
         scope.set_probe_scale(self.CH_SECONDARY, self.output_voltage_probe_scale)
 
-        # V/div scales — fit the peak voltage in ~4 divisions (leaving headroom for ringing)
-        V_pri_scale = max(0.5, voltage / 4.0)              # CH1: primary voltage
-        V_sec_scale = max(0.1, (N2 / N1 * voltage) / 4.0) # CH2: secondary ≈ (N2/N1) × V
+        # Voltage ranges.  The half-bridge drives the DUT between both rails, so
+        # V_pri peaks at ~±voltage (plus ringing overshoot).  These are ± FULL
+        # SCALE, not volts/div: a ±10 V swing needs the ±20 V range, not ±5 V.
+        V_pri_probe = scope.probe_scale.get(self.CH_VOLTAGE, 1.0) or 1.0
+        V_sec_probe = scope.probe_scale.get(self.CH_SECONDARY, 1.0) or 1.0
+        V_pri_scale = _smallest_range_fitting(scope, voltage / V_pri_probe)
+        V_sec_scale = _smallest_range_fitting(scope, (N2 / N1 * voltage) / V_sec_probe)
 
-        # Current scale: ΔI = V·T_half/L; fit peak swing in 3 divs with 1 div headroom
+        # Current range: ΔI = V·T_half/L is in AMPS; convert to volts at the BNC
+        # (amps = volts × probe_scale) before picking the smallest range that fits.
         T_half_est = T_total / 8.0
-        if L_henry is not None and L_henry > 0:
-            delta_I = voltage * T_half_est / L_henry
-            I_scale = max(0.05, delta_I / 3.0)
-        else:
-            I_scale = 0.1   # conservative fallback
+        cur_probe_scale = scope.probe_scale.get(self.CH_CURRENT, 1.0) or 1.0
+        I_peak = (voltage * T_half_est / L_henry
+                  if L_henry is not None and L_henry > 0
+                  else 0.2)          # conservative fallback
+        I_scale = _smallest_range_fitting(scope, I_peak / cur_probe_scale)
 
         # Note: set_channel_configuration() resets channel labels; set them after.
         scope.set_channel_configuration(self.CH_VOLTAGE,   V_pri_scale, "DC", 0.0)
@@ -568,7 +613,8 @@ class CoreLossMeasurement(Measurement):
         scope.set_sampling_time(dt_target)
 
         print(
-            f"Scope config — V_pri: {V_pri_scale:.3f} V/div  V_sec: {V_sec_scale:.3f} V/div"
+            f"Scope config — ranges (± full scale): V_pri ±{V_pri_scale:g} V"
+            f"  V_sec ±{V_sec_scale:g} V  I ±{I_scale:g} V"
             f"  V_trig: {volt_trigger:.3f} V (CH_VOLTAGE)"
             f"  acqTime: {T_total * 1.5 * 1e6:.0f} us  samples: {n_samples}"
         )

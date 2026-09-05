@@ -1,0 +1,412 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/utils.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "description": "Some definition utils",
+    "title": "utils",
+    "type": "object",
+    "$defs": {
+        "baseOperatingPoint": {
+            "description": "Base fields common to all topology operating points",
+            "title": "topologyExcitation",
+            "type": "object",
+            "properties": {
+                "outputVoltages": {
+                    "description": "List of output voltages, one per output. Interpreted per outputVoltagesType (default: dc). See docs/normative-references.md.",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 1
+                },
+                "outputVoltagesType": {
+                    "description": "Type of value carried in outputVoltages: which aggregate of the periodic waveform the number represents. Defaults to dc. See IEV 103-02 (values of a periodic quantity).",
+                    "type": "string",
+                    "enum": [
+                        "dc",
+                        "rms",
+                        "peak",
+                        "peakToPeak",
+                        "average"
+                    ],
+                    "default": "dc"
+                },
+                "outputCurrents": {
+                    "description": "List of output currents, one per output. Interpreted per outputCurrentsType (default: dc). See docs/normative-references.md.",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 1
+                },
+                "outputCurrentsType": {
+                    "description": "Type of value carried in outputCurrents: which aggregate of the periodic waveform the number represents. Defaults to dc. See IEV 103-02 (values of a periodic quantity).",
+                    "type": "string",
+                    "enum": [
+                        "dc",
+                        "rms",
+                        "peak",
+                        "peakToPeak",
+                        "average"
+                    ],
+                    "default": "dc"
+                },
+                "switchingFrequency": {
+                    "description": "Switching frequency of the operating point. Unit: Hz. See docs/units.md.",
+                    "type": "number"
+                },
+                "ambientTemperature": {
+                    "description": "Ambient temperature of the operating point. Unit: Celsius. See docs/units.md.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "outputVoltages",
+                "outputCurrents",
+                "switchingFrequency",
+                "ambientTemperature"
+            ]
+        },
+        "insulationType": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/isolationClass"
+        },
+        "wiringTechnology": {
+            "description": "Technology that must be used to create the wiring",
+            "type": "string",
+            "enum": [
+                "wound",
+                "printed",
+                "stamped",
+                "deposition"
+            ]
+        },
+        "application": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/magneticApplication"
+        },
+        "applications": {
+            "description": "List of applications a magnetic material can serve",
+            "title": "applications",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/application"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "subApplication": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/magneticSubApplication"
+        },
+        "resistivityPoint": {
+            "description": "data for describing one point of resistivity",
+            "title": "resistivityPoint",
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "Resistivity value, in Ohm * m",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "temperature": {
+                    "description": "Temperature for the field value, in Celsius.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "rotation": {
+            "description": "Euler angle triplet [rx, ry, rz] describing the rotation around each cartesian axis, in radians",
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+        },
+        "coordinates": {
+            "description": "Coordinates in 2D or 3D space. Interpretation depends on the sibling coordinateSystem (default: cartesian). Cartesian: (x, y) or (x, y, z). Polar (2D only): (r, theta). Cylindrical (3D only): (r, theta, z) — natural for toroidal geometry.",
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 3
+        },
+        "dimensions": {
+            "description": "Dimensions in 2D or 3D space. Interpretation depends on the sibling coordinateSystem (default: cartesian). Cartesian: (x, y) or (x, y, z). Polar (2D only): (r, theta). Cylindrical (3D only): (r, theta, z) — natural for toroidal geometry.",
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 3
+        },
+        "velocity": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/velocity"
+        },
+        "toleranceMatrix": {
+            "description": "Data a two dimensional matrix, created as an array of array, where the first coordinate in the X and the second the Y",
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                    "$ref": "#/$defs/dimensionWithTolerance"
+                }
+            }
+        },
+        "dimensionWithTolerance": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/dimensionWithTolerance"
+        },
+        "dimension": {
+            "description": "A dimension that can be either a simple number or a dimensionWithTolerance",
+            "title": "dimension",
+            "oneOf": [
+                {
+                    "type": "number"
+                },
+                {
+                    "$ref": "#/$defs/dimensionWithTolerance"
+                }
+            ]
+        },
+        "columnShape": {
+            "description": "Shape of the column, also used for gaps",
+            "type": "string",
+            "enum": [
+                "oblong",
+                "round",
+                "rectangular",
+                "irregular"
+            ]
+        },
+        "connectionType": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/connectionType"
+        },
+        "complexFieldPoint": {
+            "description": "Data describing the complex value of a field in a 2D or 3D space",
+            "title": "complexFieldPoint",
+            "type": "object",
+            "properties": {
+                "turnIndex": {
+                    "description": "If this field point is inside of a wire, this is the index of the turn",
+                    "type": "integer"
+                },
+                "turnLength": {
+                    "description": "If this field point is inside of a wire, this is the length of the turn",
+                    "type": "number"
+                },
+                "label": {
+                    "description": "If this point has some special significance, can be identified with this label",
+                    "type": "string"
+                },
+                "point": {
+                    "description": "The coordinates of the point of the field",
+                    "$ref": "#/$defs/coordinates"
+                },
+                "real": {
+                    "description": "Real value of the field at this point",
+                    "type": "number"
+                },
+                "imaginary": {
+                    "description": "Imaginary value of the field at this point.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "point",
+                "real",
+                "imaginary"
+            ],
+            "additionalProperties": false
+        },
+        "complexField": {
+            "description": "Data describing a field in a 2D or 3D space",
+            "title": "complexField",
+            "type": "object",
+            "properties": {
+                "frequency": {
+                    "description": "Value of the field at this point",
+                    "type": "number"
+                },
+                "data": {
+                    "description": "Value of the magnetizing inductance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/complexFieldPoint"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "frequency",
+                "data"
+            ],
+            "additionalProperties": false
+        },
+        "fieldPoint": {
+            "description": "Data describing the value of a field in a 2D or 3D space",
+            "title": "fieldPoint",
+            "type": "object",
+            "properties": {
+                "turnIndex": {
+                    "description": "If this field point is inside of a wire, this is the index of the turn",
+                    "type": "integer"
+                },
+                "turnLength": {
+                    "description": "If this field point is inside of a wire, this is the length of the turn",
+                    "type": "number"
+                },
+                "label": {
+                    "description": "If this point has some special significance, can be identified with this label",
+                    "type": "string"
+                },
+                "point": {
+                    "description": "The coordinates of the point of the field",
+                    "$ref": "#/$defs/coordinates"
+                },
+                "rotation": {
+                    "description": "Rotation of the rectangle defining the turn, in degrees",
+                    "type": "number",
+                    "default": 0
+                },
+                "value": {
+                    "description": "Value of the field at this point.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "point",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "field": {
+            "description": "Data describing a field in a 2D or 3D space",
+            "title": "field",
+            "type": "object",
+            "properties": {
+                "frequency": {
+                    "description": "Value of the field at this point",
+                    "type": "number"
+                },
+                "data": {
+                    "description": "Value of the magnetizing inductance",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/fieldPoint"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "frequency",
+                "data"
+            ],
+            "additionalProperties": false
+        },
+        "coordinateSystem": {
+            "description": "System in which dimensions and coordinates are expressed. Cartesian: (x, y) or (x, y, z). Polar: (r, theta) — 2D only. Cylindrical: (r, theta, z) — 3D only, natural for toroidal cores. Spherical is not used in magnetic-component description.",
+            "title": "coordinateSystem",
+            "type": "string",
+            "enum": [
+                "cartesian",
+                "polar",
+                "cylindrical"
+            ],
+            "default": "cartesian"
+        },
+        "windingOrientation": {
+            "description": "Way in which the elements are oriented inside their parent",
+            "title": "windingOrientation",
+            "type": "string",
+            "enum": [
+                "contiguous",
+                "overlapping"
+            ]
+        },
+        "electricalType": {
+            "description": "Type of an electrical element in a coil",
+            "title": "electricalType",
+            "type": "string",
+            "enum": [
+                "conduction",
+                "insulation",
+                "shielding"
+            ]
+        },
+        "coilAlignment": {
+            "description": "Way in which elements are aligned inside their parent",
+            "title": "coilAlignment",
+            "type": "string",
+            "enum": [
+                "innerOrTop",
+                "outerOrBottom",
+                "spread",
+                "centered"
+            ]
+        },
+        "windingStyle": {
+            "description": "Defines how a section or layer is wound",
+            "title": "windingStyle",
+            "type": "string",
+            "enum": [
+                "windByConsecutiveTurns",
+                "windByConsecutiveParallels"
+            ]
+        },
+        "impedanceAtFrequency": {
+            "description": "An impedance value pinned to a specific frequency. The impedance is a structured impedancePoint with magnitude, phase and real/imaginary parts. Bare-magnitude callers populate magnitude only and leave phase / real / imaginary unset.",
+            "title": "impedanceAtFrequency",
+            "type": "object",
+            "properties": {
+                "frequency": {
+                    "description": "Frequency at which the impedance applies. Unit: Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "impedance": {
+                    "$ref": "./inputs/designRequirements.json#/$defs/impedancePoint"
+                }
+            },
+            "required": [
+                "frequency",
+                "impedance"
+            ],
+            "additionalProperties": false
+        },
+        "powerFlowDirection": {
+            "description": "Bidirectional power-flow direction. Used by all topologies that share forward/reverse semantics (CLLC, CLLLC, Cuk). Single canonical definition; topology schemas reference this via $ref.",
+            "title": "powerFlowDirection",
+            "type": "string",
+            "enum": [
+                "forward",
+                "reverse"
+            ]
+        },
+        "isolationSide": {
+            "description": "Tag to identify windings that are sharing the same ground",
+            "title": "isolationSide",
+            "type": "string",
+            "enum": [
+                "primary",
+                "secondary",
+                "tertiary",
+                "quaternary",
+                "quinary",
+                "senary",
+                "septenary",
+                "octonary",
+                "nonary",
+                "denary",
+                "undenary",
+                "duodenary"
+            ]
+        },
+        "provenance": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/provenance",
+            "$comment": "Alias to the canonical PEAS provenance (the former inline copy was byte-identical)."
+        }
+    }
+}

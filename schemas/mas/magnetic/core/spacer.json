@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/core/spacer.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "core/spacer",
+    "description": "Data describing the spacer used to separate cores in additive gaps",
+    "type": "object",
+    "properties": {
+        "type": {
+            "description": "The type of spacer",
+            "type": "string",
+            "enum": [
+                "spacer"
+            ]
+        },
+        "insulationMaterial": {
+            "description": "Material of the spacer",
+            "title": "InsulationMaterialDataOrNameUnion",
+            "oneOf": [
+                {
+                    "$ref": "../insulation/material.json"
+                },
+                {
+                    "description": "The name of the material used in the insulation",
+                    "type": "string"
+                }
+            ]
+        },
+        "dimensions": {
+            "description": "Dimensions of the cube defining the spacer",
+            "$ref": "../../utils.json#/$defs/dimensions"
+        },
+        "coordinates": {
+            "description": "The coordinates of the center of the gap, referred to the center of the main column",
+            "$ref": "../../utils.json#/$defs/coordinates"
+        }
+    },
+    "required": [
+        "type",
+        "insulationMaterial",
+        "dimensions",
+        "coordinates"
+    ],
+    "additionalProperties": false
+}

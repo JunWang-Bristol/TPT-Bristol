@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/MAS.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "MAS",
+    "description": "All the data structure used in the Magnetic Agnostic Structure",
+    "type": "object",
+    "properties": {
+        "inputs": {
+            "description": "The description of the inputs that can be used to design a Magnetic",
+            "title": "Inputs",
+            "$ref": "./inputs.json"
+        },
+        "magnetic": {
+            "description": "The description of a magnetic",
+            "title": "Magnetic",
+            "$ref": "./magnetic.json"
+        },
+        "outputs": {
+            "description": "The description of the outputs that are produced after designing a Magnetic",
+            "title": "Outputs",
+            "type": "array",
+            "items": {
+                "$ref": "./outputs.json"
+            }
+        }
+    },
+    "required": [
+        "inputs",
+        "magnetic",
+        "outputs"
+    ],
+    "additionalProperties": false
+}

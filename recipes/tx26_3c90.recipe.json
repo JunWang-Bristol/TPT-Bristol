@@ -1,0 +1,70 @@
+{
+  "name": "tx26_3c90",
+  "hardware_configuration": "hardware_configuration.json",
+
+  "dut": {
+    "shape": "TX26/15/10",
+    "material": "3C90",
+    "N1": 10,
+    "N2": 10,
+    "L_estimate_H": 404e-6,
+    "temperature_C": 25.0
+  },
+
+  "procedures": [
+    {
+      "type": "core_loss_map",
+      "frequency_Hz": [25e3, 50e3, 100e3],
+      "B_peak_T": [0.05, 0.10, 0.20],
+      "dc_bias_A": [0.0, 0.10, 0.20],
+      "duty": [0.5]
+    },
+    {
+      "type": "permeability_set",
+      "kinds": ["amplitude", "incremental", "reversible", "complex_fundamental"],
+      "frequency_Hz": 50e3,
+      "B_peak_T": [0.010, 0.025, 0.050, 0.100],
+      "dc_bias_A": [0.0, 0.10, 0.20]
+    },
+    {
+      "type": "inductance_vs_bias",
+      "frequency_Hz": 50e3,
+      "B_ac_T": 0.05,
+      "i_max_A": 0.6,
+      "steps": 8,
+      "knee_stop_pct": 30
+    },
+    {
+      "type": "saturation_curve",
+      "frequency_Hz": 25e3,
+      "steps": 10,
+      "mu_drop_pct": 50
+    },
+    {
+      "type": "demagnetize",
+      "verify_reset": true
+    }
+  ],
+
+  "qc": {
+    "max_imbalance_pct": 5.0,
+    "max_ipp_ratio": 3.0,
+    "min_vpri_fraction": 0.5,
+    "retries": 3
+  },
+
+  "limits": {
+    "psu_max_V": 30.0,
+    "i_limit_A": 2.0,
+    "f_min_Hz": 1e3,
+    "f_max_Hz": 200e3,
+    "deadtime_s": 500e-9
+  },
+
+  "export": {
+    "format": "MAS coreMaterial + outputs",
+    "origin": "measurement",
+    "directory": "datasets",
+    "save_waveforms": true
+  }
+}

@@ -1,0 +1,439 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/core.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "magneticCore",
+    "description": "The description of a magnetic core",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "The name of core",
+            "type": "string"
+        },
+        "manufacturerInfo": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/manufacturerInfo"
+        },
+        "distributorsInfo": {
+            "description": "The lists of distributors of the magnetic core",
+            "type": "array",
+            "items": {
+                "$ref": "https://psma.com/peas/utils.json#/$defs/distributorInfo"
+            },
+            "uniqueItems": false
+        },
+        "functionalDescription": {
+            "description": "The data from the core based on its function, in a way that can be used by analytical models.",
+            "type": "object",
+            "title": "coreFunctionalDescription",
+            "properties": {
+                "type": {
+                    "description": "The type of core",
+                    "title": "coreType",
+                    "type": "string",
+                    "enum": [
+                        "twoPieceSet",
+                        "pieceAndPlate",
+                        "toroidal",
+                        "closedShape",
+                        "openShape"
+                    ]
+                },
+                "material": {
+                    "title": "CoreMaterialDataOrNameUnion",
+                    "oneOf": [
+                        {
+                            "$ref": "./core/material.json"
+                        },
+                        {
+                            "description": "The name of the material used in the core",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "shape": {
+                    "title": "CoreShapeDataOrNameUnion",
+                    "oneOf": [
+                        {
+                            "$ref": "./core/shape.json"
+                        },
+                        {
+                            "description": "The name of the shape used in the core",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "gapping": {
+                    "description": "The lists of gaps in the magnetic core",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./core/gap.json"
+                    },
+                    "uniqueItems": false
+                },
+                "numberStacks": {
+                    "description": "The number of stacked cores",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "coating": {
+                    "description": "The coating of the core",
+                    "title": "CoreCoatingDataOrNameUnion",
+                    "oneOf": [
+                        {
+                            "$ref": "./core/coating.json"
+                        },
+                        {
+                            "description": "The name of the coating used in the core",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "type",
+                "material",
+                "shape",
+                "gapping"
+            ],
+            "additionalProperties": false
+        },
+        "processedDescription": {
+            "description": "The data from the core after been processed, and ready to use by the analytical models",
+            "type": "object",
+            "title": "coreProcessedDescription",
+            "properties": {
+                "effectiveParameters": {
+                    "$ref": "#/$defs/effectiveParameters"
+                },
+                "width": {
+                    "description": "Total width of the core",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "height": {
+                    "description": "Total height of the core",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "depth": {
+                    "description": "Total depth of the core",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "thermalResistance": {
+                    "description": "Parameter describing steady state temperature rise versus dissipated power within a given device.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "windingWindows": {
+                    "description": "List of winding windows, all elements in the list must be of the same type",
+                    "title": "windingWindows",
+                    "oneOf": [
+                        {
+                            "description": "List of rectangular winding windows",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/rectangularWindingWindow"
+                            },
+                            "minItems": 1,
+                            "uniqueItems": false
+                        },
+                        {
+                            "description": "List of radial winding windows",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/radialWindingWindow"
+                            },
+                            "minItems": 1,
+                            "uniqueItems": false
+                        }
+                    ]
+                },
+                "columns": {
+                    "description": "List of columns in the core",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/columnData"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": false
+                }
+            },
+            "required": [
+                "effectiveParameters",
+                "width",
+                "height",
+                "depth",
+                "windingWindows",
+                "columns"
+            ],
+            "additionalProperties": false
+        },
+        "geometricalDescription": {
+            "description": "List with data from the core based on its geometrical description, in a way that can be used by CAD models.",
+            "title": "coreGeometricalDescription",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/coreGeometricalDescriptionElement"
+            },
+            "uniqueItems": true
+        }
+    },
+    "required": [
+        "functionalDescription"
+    ],
+    "$defs": {
+        "coreGeometricalDescriptionElement": {
+            "description": "The data from the core based on its geometrical description, in a way that can be used by CAD models.",
+            "title": "coreGeometricalDescriptionElement",
+            "oneOf": [
+                {
+                    "$ref": "./core/piece.json"
+                },
+                {
+                    "$ref": "./core/spacer.json"
+                }
+            ]
+        },
+        "effectiveParameters": {
+            "description": "Effective data of the magnetic core",
+            "type": "object",
+            "properties": {
+                "effectiveLength": {
+                    "description": "This is the equivalent length that the magnetic flux travels through the core.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "effectiveArea": {
+                    "description": "This is the equivalent section that the magnetic flux traverses, because the shape of the core is not uniform and its section changes along the path",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "minimumArea": {
+                    "description": "This is the minimum area seen by the magnetic flux along its path",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "effectiveVolume": {
+                    "description": "This is the product of the effective length by the effective area, and represents the equivalent volume that is magnetized by the field",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                }
+            },
+            "required": [
+                "effectiveLength",
+                "effectiveArea",
+                "minimumArea",
+                "effectiveVolume"
+            ],
+            "additionalProperties": false
+        },
+        "rectangularWindingWindow": {
+            "description": "It is the area between the winding column and the closest lateral column, and it represents the area where all the wires of the magnetic will have to fit, and equivalently, where all the current must circulate once, in the case of inductors, or twice, in the case of transformers",
+            "type": "object",
+            "properties": {
+                "shape": {
+                    "description": "Shape of the winding window",
+                    "title": "windingWindowShape",
+                    "type": "string",
+                    "const": "rectangular"
+                },
+                "width": {
+                    "description": "Horizontal width of the winding window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "height": {
+                    "description": "Vertical height of the winding window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "area": {
+                    "description": "Area of the winding window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "coordinates": {
+                    "description": "The coordinates of the center of the winding window, referred to the center of the main column. In the case of half-sets, the center will be in the top point, where it would join another half-set",
+                    "$ref": "../utils.json#/$defs/coordinates"
+                },
+                "sectionsOrientation": {
+                    "description": "Way in which the sections are oriented inside the winding window",
+                    "title": "windingOrientation",
+                    "type": "string",
+                    "enum": [
+                        "contiguous",
+                        "overlapping"
+                    ]
+                },
+                "sectionsAlignment": {
+                    "description": "Way in which the sections are aligned inside the winding window",
+                    "title": "coilAlignment",
+                    "type": "string",
+                    "enum": [
+                        "innerOrTop",
+                        "outerOrBottom",
+                        "spread",
+                        "centered"
+                    ]
+                },
+                "windingOrder": {
+                    "description": "Default order in which consecutive layers are wound within each section in this winding window (overridable per section). 'U' alternates the winding direction every layer (back-and-forth); 'Z' winds every layer in the same direction with a return wire (foldback).",
+                    "title": "windingOrder",
+                    "type": "string",
+                    "enum": [
+                        "U",
+                        "Z"
+                    ]
+                },
+                "column": {
+                    "description": "Index of the column (in the columns list of the core processed description) that the turns placed in this winding window are wound around. If not present, the main column is assumed (the first central column, or the first column if there is no central one)",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "width",
+                "height"
+            ],
+            "additionalProperties": false
+        },
+        "radialWindingWindow": {
+            "description": "It is the area between the delimited between a height from the surface of the toroidal core at a given angle, and it represents the area where all the wires of the magnetic will have to fit, and equivalently, where all the current must circulate once, in the case of inductors, or twice, in the case of transformers",
+            "type": "object",
+            "properties": {
+                "shape": {
+                    "description": "Shape of the winding window",
+                    "title": "windingWindowShape",
+                    "type": "string",
+                    "const": "round"
+                },
+                "angle": {
+                    "description": "Total angle of the window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "radialHeight": {
+                    "description": "Radial height of the winding window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "area": {
+                    "description": "Area of the winding window",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "coordinates": {
+                    "description": "The coordinates of the point of the winding window where the middle height touches the main column, referred to the center of the main column. In the case of half-sets, the center will be in the top point, where it would join another half-set",
+                    "$ref": "../utils.json#/$defs/coordinates"
+                },
+                "sectionsOrientation": {
+                    "description": "Way in which the sections are oriented inside the winding window",
+                    "title": "windingOrientation",
+                    "type": "string",
+                    "enum": [
+                        "contiguous",
+                        "overlapping"
+                    ]
+                },
+                "sectionsAlignment": {
+                    "description": "Way in which the sections are aligned inside the winding window",
+                    "title": "coilAlignment",
+                    "type": "string",
+                    "enum": [
+                        "innerOrTop",
+                        "outerOrBottom",
+                        "spread",
+                        "centered"
+                    ]
+                },
+                "windingOrder": {
+                    "description": "Default order in which consecutive layers are wound within each section in this winding window (overridable per section). 'U' alternates the winding direction every layer (back-and-forth); 'Z' winds every layer in the same direction with a return wire (foldback).",
+                    "title": "windingOrder",
+                    "type": "string",
+                    "enum": [
+                        "U",
+                        "Z"
+                    ]
+                },
+                "column": {
+                    "description": "Index of the column (in the columns list of the core processed description) that the turns placed in this winding window are wound around. If not present, the main column is assumed (the first central column, or the first column if there is no central one)",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "angle",
+                "radialHeight"
+            ],
+            "additionalProperties": false
+        },
+        "columnData": {
+            "description": "Data describing a column of the core",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name given to the column, so it can be referenced. If not present, the column is identified by its index in the columns list and by its coordinates",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of the column, according to its position in the core: central column or lateral (return) column",
+                    "type": "string",
+                    "enum": [
+                        "central",
+                        "lateral"
+                    ]
+                },
+                "shape": {
+                    "title": "ColumnShape",
+                    "$ref": "../utils.json#/$defs/columnShape"
+                },
+                "area": {
+                    "description": "Area of the section column, normal to the magnetic flux direction",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "width": {
+                    "description": "Width of the column",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "depth": {
+                    "description": "Depth of the column",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "minimumWidth": {
+                    "description": "Minimum width of the column, if irregular",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "minimumDepth": {
+                    "description": "Minimum depth of the column, if irregular",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "height": {
+                    "description": "Height of the column",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "coordinates": {
+                    "description": "The coordinates of the center of the column, referred to the center of the main column. In the case of half-sets, the center will be in the top point, where it would join another half-set",
+                    "$ref": "../utils.json#/$defs/coordinates"
+                }
+            },
+            "required": [
+                "type",
+                "shape",
+                "width",
+                "depth",
+                "height",
+                "area",
+                "coordinates"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

@@ -1,0 +1,107 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/llcResonant.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "llcResonant",
+    "description": "The description of an LLC Resonant converter excitation",
+    "type": "object",
+    "properties": {
+        "inputVoltage": {
+            "description": "The input voltage of the LLC converter",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "minSwitchingFrequency": {
+            "description": "The minimum switching frequency for regulation",
+            "type": "number"
+        },
+        "maxSwitchingFrequency": {
+            "description": "The maximum switching frequency for regulation",
+            "type": "number"
+        },
+        "resonantFrequency": {
+            "description": "The resonant frequency of the tank (optional, will be calculated if not provided)",
+            "type": "number"
+        },
+        "inductanceRatio": {
+            "description": "The inductance ratio between Lm/Ls",
+            "type": "number"
+        },
+        "qualityFactor": {
+            "description": "The quality factor of the resonant tank",
+            "type": "number",
+            "default": 0.4
+        },
+        "efficiency": {
+            "description": "The target efficiency",
+            "type": "number",
+            "default": 0.97
+        },
+        "bridgeType": {
+            "description": "The type of primary bridge",
+            "$ref": "#/$defs/llcBridgeType"
+        },
+        "rectifierType": {
+            "description": "The type of secondary rectifier",
+            "$ref": "#/$defs/llcRectifierType"
+        },
+        "integratedResonantInductor": {
+            "description": "Whether the resonant inductor is integrated in the transformer (leakage)",
+            "type": "boolean",
+            "default": true
+        },
+        "seriesInductance": {
+            "description": "Optional explicit resonant inductor (Ls) value in H. Overrides the Q/Ln/fr derivation when set.",
+            "type": "number"
+        },
+        "resonantCapacitance": {
+            "description": "Optional explicit resonant capacitor (Cr) value in F. Overrides the Q/Ln/fr derivation when set.",
+            "type": "number"
+        },
+        "operatingPoints": {
+            "description": "A list of operating points",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/llcOperatingPoint"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "inputVoltage",
+        "minSwitchingFrequency",
+        "maxSwitchingFrequency",
+        "operatingPoints"
+    ],
+    "$defs": {
+        "llcBridgeType": {
+            "description": "The type of primary bridge for LLC",
+            "title": "llcBridgeType",
+            "type": "string",
+            "enum": [
+                "halfBridge",
+                "fullBridge"
+            ]
+        },
+        "llcRectifierType": {
+            "description": "The type of secondary rectifier for LLC",
+            "title": "llcRectifierType",
+            "type": "string",
+            "enum": [
+                "centerTapped",
+                "fullBridge",
+                "currentDoubler",
+                "voltageDoubler"
+            ]
+        },
+        "llcOperatingPoint": {
+            "description": "The description of one LLC operating point",
+            "title": "llcOperatingPoint",
+            "allOf": [
+                {
+                    "$ref": "../../utils.json#/$defs/baseOperatingPoint"
+                }
+            ]
+        }
+    },
+    "additionalProperties": false
+}

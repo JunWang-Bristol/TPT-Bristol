@@ -14,8 +14,16 @@ class BK(PowerSupply):
 
         self.visa_session.timeout = 60000  # milliseconds (increased for self-test)
         self.visa_session.read_termination = '\n'
-        self.visa_session.write_termination = '\n'
         self.visa_session.baud_rate = 9600
+
+        # Line ending is DETECTED, not assumed.  This supply has been observed
+        # to accept only '\r\n' — with '\n' it never sees a complete command and
+        # every query times out, which looks exactly like a dead instrument: the
+        # port opens, nothing ever answers, and a 60 s timeout means each failed
+        # query stalls for a full minute.  Hardcoding either ending turns a
+        # 30-second settings difference into a hardware fault hunt, so probe for
+        # the one that actually works and remember it.
+        self._detect_write_termination()
 
         # Put device into remote control mode
         self.visa_session.write('SYST:REM')
@@ -23,6 +31,45 @@ class BK(PowerSupply):
 
         test = self.visa_session.query('*TST?')
         assert test == "0", f"Initial test return fail: {test}"
+
+    def _detect_write_termination(self, candidates=('\r\n', '\n'), probe='*IDN?',
+                                  probe_timeout_ms=2000):
+        """Pick the line ending this supply actually answers to.
+
+        Tries each candidate with a short timeout and keeps the first that
+        produces a reply.  If none does, leaves the first candidate in place and
+        lets the caller's own error surface — the failure is then genuinely the
+        instrument, not the framing.
+        """
+        original_timeout = self.visa_session.timeout
+        try:
+            for ending in candidates:
+                self.visa_session.write_termination = ending
+                self.visa_session.timeout = probe_timeout_ms
+                try:
+                    self._flush_silently()
+                    if self.visa_session.query(probe).strip():
+                        self.write_termination_detected = ending
+                        return ending
+                except Exception:                              # noqa: BLE001
+                    continue
+            self.visa_session.write_termination = candidates[0]
+            self.write_termination_detected = None
+            return None
+        finally:
+            self.visa_session.timeout = original_timeout
+
+    def _flush_silently(self):
+        """Drop anything already waiting, so a probe reads its own reply."""
+        original_timeout = self.visa_session.timeout
+        self.visa_session.timeout = 120
+        try:
+            while True:
+                self.visa_session.read_raw()
+        except Exception:                                      # noqa: BLE001
+            pass
+        finally:
+            self.visa_session.timeout = original_timeout
 
         self.voltages = None
         self.channels = None

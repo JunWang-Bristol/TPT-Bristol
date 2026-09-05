@@ -1,0 +1,129 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/inputs/topologies/flyback.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "flyback",
+    "description": "The description of a Flyback converter excitation",
+    "type": "object",
+    "properties": {
+        "inputVoltage": {
+            "description": "The input voltage of the flyback",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "diodeVoltageDrop": {
+            "description": "The voltage drop on the diode",
+            "type": "number"
+        },
+        "maximumDrainSourceVoltage": {
+            "description": "The maximum drain-source voltage in the selected switch",
+            "type": "number"
+        },
+        "maximumDutyCycle": {
+            "description": "The maximum duty cycle in the selected switch",
+            "type": "number"
+        },
+        "currentRippleRatio": {
+            "description": "The maximum current ripple allowed in the output",
+            "type": "number"
+        },
+        "efficiency": {
+            "description": "The target efficiency",
+            "type": "number",
+            "default": 0.95
+        },
+        "operatingPoints": {
+            "description": "A list of operating points",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/flybackOperatingPoint"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "inputVoltage",
+        "diodeVoltageDrop",
+        "currentRippleRatio",
+        "efficiency",
+        "operatingPoints"
+    ],
+    "$defs": {
+        "flybackModes": {
+            "description": "The conduction mode of the Flyback",
+            "title": "flybackModes",
+            "type": "string",
+            "enum": [
+                "continuousConductionMode",
+                "discontinuousConductionMode",
+                "quasiResonantMode",
+                "boundaryModeOperation"
+            ]
+        },
+        "flybackOperatingPoint": {
+            "description": "The description of one flyback operating point. Flyback does not require switchingFrequency at the schema level: when omitted, it is inferred from the conduction mode, see docs/inputs.md.",
+            "title": "flybackOperatingPoint",
+            "type": "object",
+            "properties": {
+                "outputVoltages": {
+                    "description": "List of output voltages, one per output. Interpreted per outputVoltagesType (default: dc).",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 1
+                },
+                "outputVoltagesType": {
+                    "description": "Type of value carried in outputVoltages. Defaults to dc.",
+                    "type": "string",
+                    "enum": [
+                        "dc",
+                        "rms",
+                        "peak",
+                        "peakToPeak",
+                        "average"
+                    ],
+                    "default": "dc"
+                },
+                "outputCurrents": {
+                    "description": "List of output currents, one per output. Interpreted per outputCurrentsType (default: dc).",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 1
+                },
+                "outputCurrentsType": {
+                    "description": "Type of value carried in outputCurrents. Defaults to dc.",
+                    "type": "string",
+                    "enum": [
+                        "dc",
+                        "rms",
+                        "peak",
+                        "peakToPeak",
+                        "average"
+                    ],
+                    "default": "dc"
+                },
+                "switchingFrequency": {
+                    "description": "Switching frequency of the operating point. Unit: Hz. Optional for flyback when mode is supplied.",
+                    "type": "number"
+                },
+                "mode": {
+                    "description": "The conduction mode of the operating point.",
+                    "$ref": "#/$defs/flybackModes"
+                },
+                "ambientTemperature": {
+                    "description": "Ambient temperature of the operating point. Unit: Celsius.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "outputVoltages",
+                "outputCurrents",
+                "ambientTemperature"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

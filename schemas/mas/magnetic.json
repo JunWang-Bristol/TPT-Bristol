@@ -1,0 +1,1057 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "magnetic",
+    "description": "The description of a magnetic",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Human-readable name/reference of this magnetic component (e.g. the design or part label)."
+        },
+        "core": {
+            "description": "Data describing the magnetic core.",
+            "$ref": "./magnetic/core.json"
+        },
+        "coil": {
+            "description": "Data describing the coil",
+            "$ref": "./magnetic/coil.json"
+        },
+        "manufacturerInfo": {
+            "title": "magneticManufacturerInfo",
+            "description": "Manufacturer information for the magnetic. Extends the shared manufacturerInfo with a datasheetInfo block for catalogue-level data.",
+            "allOf": [
+                {
+                    "$ref": "https://psma.com/peas/utils.json#/$defs/manufacturerInfo"
+                }
+            ],
+            "properties": {
+                "datasheetInfo": {
+                    "description": "All values extracted directly from the component datasheet, organised by domain.",
+                    "$ref": "#/$defs/magneticDatasheetInfo"
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "distributorsInfo": {
+            "description": "The lists of distributors of the magnetic",
+            "type": "array",
+            "items": {
+                "$ref": "https://psma.com/peas/utils.json#/$defs/distributorInfo"
+            },
+            "uniqueItems": false
+        },
+        "rotation": {
+            "description": "The rotation of the magnetic, by default the winding column goes vertical",
+            "$ref": "./utils.json#/$defs/rotation"
+        }
+    },
+    "required": [],
+    "$defs": {
+        "magneticDatasheetInfo": {
+            "description": "All values extracted directly from the component datasheet, organised by domain.",
+            "type": "object",
+            "properties": {
+                "part": {
+                    "description": "Basic part identification from the datasheet.",
+                    "$ref": "#/$defs/magneticDatasheetPart"
+                },
+                "electrical": {
+                    "description": "Electrical characteristics as stated in the datasheet, one entry per connection configuration. A part with a single configuration has a one-entry array; parts that can be wired several ways (e.g. a multiline suppression bead used as common-mode choke, series inductor, etc.) have one entry per wiring. In each entry the required `subtype` selects the variant, `name` / `numberTurns` describe the configuration, and the remaining fields are the electrical characteristics for that wiring.",
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/$defs/magneticDatasheetInductorElectrical"
+                            },
+                            {
+                                "$ref": "#/$defs/magneticDatasheetCoupledInductorElectrical"
+                            },
+                            {
+                                "$ref": "#/$defs/magneticDatasheetTransformerElectrical"
+                            },
+                            {
+                                "$ref": "#/$defs/magneticDatasheetCommonModeChokeElectrical"
+                            },
+                            {
+                                "$ref": "#/$defs/magneticDatasheetChipBeadElectrical"
+                            },
+                            {
+                                "$ref": "#/$defs/magneticDatasheetCableCoreElectrical"
+                            }
+                        ]
+                    }
+                },
+                "thermal": {
+                    "description": "Operating temperature range from the datasheet.",
+                    "$ref": "#/$defs/magneticDatasheetThermal"
+                },
+                "mechanical": {
+                    "description": "Physical dimensions and mounting style from the datasheet.",
+                    "$ref": "#/$defs/magneticDatasheetMechanical"
+                },
+                "application": {
+                    "description": "Application parameters published by the manufacturer — describes the circuit this component was designed for, not the component's intrinsic electrical properties.",
+                    "$ref": "#/$defs/magneticDatasheetApplication"
+                },
+                "model": {
+                    "description": "Circuit model parameters for SPICE simulation, specialised per magnetic subtype. The required `subtype` field selects the variant. Only the chip-bead model is defined so far; transformer / inductor variants can be added to this oneOf.",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/magneticDatasheetChipBeadModel"
+                        }
+                    ]
+                },
+                "provenance": {
+                    "description": "Data-provenance trail (see provenance).",
+                    "$ref": "./utils.json#/$defs/provenance"
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetPart": {
+            "description": "Basic part identification.",
+            "type": "object",
+            "properties": {
+                "partNumber": {
+                    "description": "Manufacturer part number.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Human-readable product description as given in the datasheet or catalogue.",
+                    "type": "string"
+                },
+                "matchCode": {
+                    "description": "Internal match / order code used by the manufacturer.",
+                    "type": "string"
+                },
+                "family": {
+                    "description": "Product family or series name (e.g. WE-CMB, WE-CNSW).",
+                    "type": "string"
+                },
+                "caseCode": {
+                    "description": "Case or package code / size reference (e.g. '0805', 'SMD-4P').",
+                    "type": "string"
+                },
+                "windingStyle": {
+                    "description": "Winding construction style (e.g. bifilar, sectional, trifilar).",
+                    "type": "string"
+                },
+                "material": {
+                    "description": "Core material designation as given in the datasheet (e.g. NiZn, MnZn).",
+                    "type": "string"
+                },
+                "numberOfWindings": {
+                    "description": "Total number of electrically independent windings.",
+                    "type": "integer"
+                },
+                "automotive": {
+                    "description": "True if the part is qualified for automotive applications (AEC-Q200 or equivalent).",
+                    "type": "boolean"
+                },
+                "shielded": {
+                    "description": "True if the component has a shielded construction.",
+                    "type": "boolean"
+                },
+                "insulationGrade": {
+                    "description": "Insulation grade classification as stated in the datasheet (e.g. 'reinforced', 'basic'). Aligns with IEC insulationType vocabulary.",
+                    "type": "string",
+                    "enum": [
+                        "functional",
+                        "basic",
+                        "supplementary",
+                        "double",
+                        "reinforced"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetImpedancePoint": {
+            "title": "DatasheetImpedancePoint",
+            "description": "Impedance vs. frequency point from the datasheet, optionally parameterised by DC bias current. The magnitude goes in impedance.magnitude; phase / real / imaginary parts are optional.",
+            "type": "object",
+            "properties": {
+                "impedance": {
+                    "description": "Impedance value. Uses the same impedancePoint structure as designRequirements.",
+                    "$ref": "./inputs/designRequirements.json#/$defs/impedancePoint"
+                },
+                "frequency": {
+                    "description": "Frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "current": {
+                    "description": "DC bias current in Amperes at which this point was measured (chip beads / DC-biased parts).",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "winding": {
+                    "description": "Winding / array element this point applies to (e.g. element of a bead array). Omit for single-winding parts.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "impedance",
+                "frequency"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetInductancePoint": {
+            "title": "DatasheetInductancePoint",
+            "description": "One inductance measurement at a DC-bias current (and optional temperature) — a point on the inductance roll-off / saturation curve.",
+            "type": "object",
+            "properties": {
+                "inductance": {
+                    "description": "Inductance in Henries.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "current": {
+                    "description": "DC bias current in Amperes at which this point was measured.",
+                    "type": "number"
+                },
+                "temperature": {
+                    "description": "Measurement temperature in degrees Celsius.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "inductance"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetSaturationCurrent": {
+            "title": "DatasheetSaturationCurrent",
+            "description": "Saturation current stated at a specific inductance-drop criterion — one row of a datasheet's I_sat table. Manufacturer-agnostic: a vendor that quotes I_sat at several |dL/L| criteria (e.g. 10% and 30%) contributes one entry per criterion; a vendor that quotes a single unqualified I_sat uses the scalar saturationCurrentPeak instead.",
+            "type": "object",
+            "properties": {
+                "percentInductanceDrop": {
+                    "description": "Roll-off criterion in percent: the inductance drop |dL/L| from the small-signal value at which this saturation current is specified (e.g. 10, 20, 30).",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                "current": {
+                    "description": "Saturation current in Amperes at the stated inductance-drop criterion.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "temperature": {
+                    "description": "Measurement temperature in degrees Celsius.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "percentInductanceDrop",
+                "current"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetRatedCurrent": {
+            "title": "DatasheetRatedCurrent",
+            "description": "Rated current stated at a specific temperature-rise criterion — one row of a datasheet's rated-current table. Manufacturer-agnostic: a vendor that quotes the rating at several self-heating criteria (e.g. Würth IR1 at ΔT=20 K and IR2 at ΔT=40 K) contributes one entry per criterion; a vendor that quotes a single unqualified rating keeps using the plain ratedCurrents array.",
+            "type": "object",
+            "properties": {
+                "current": {
+                    "description": "Rated DC current in Amperes at the stated temperature rise.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "temperatureRise": {
+                    "description": "Self-heating criterion: the temperature rise above ambient, in K, at which this current is rated. Vendors range from 10 K to 40 K for the same '1 A' class of part, so cross-manufacturer comparison is only valid on a common basis.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "temperature": {
+                    "description": "Ambient reference temperature in degrees Celsius, when the datasheet states it.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "current",
+                "temperatureRise"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetResistancePoint": {
+            "title": "DatasheetResistancePoint",
+            "description": "Resistance vs. frequency point from the datasheet, optionally parameterised by DC bias current.",
+            "type": "object",
+            "properties": {
+                "resistance": {
+                    "description": "Resistance value in Ohms.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "frequency": {
+                    "description": "Frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "current": {
+                    "description": "DC bias current in Amperes at which this point was measured.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "winding": {
+                    "description": "Winding / array element this point applies to (e.g. element of a bead array). Omit for single-winding parts.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "resistance",
+                "frequency"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetReactancePoint": {
+            "title": "DatasheetReactancePoint",
+            "description": "Reactance vs. frequency point from the datasheet, optionally parameterised by DC bias current.",
+            "type": "object",
+            "properties": {
+                "reactance": {
+                    "description": "Reactance value in Ohms.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "frequency": {
+                    "description": "Frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "current": {
+                    "description": "DC bias current in Amperes at which this point was measured.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "winding": {
+                    "description": "Winding / array element this point applies to (e.g. element of a bead array). Omit for single-winding parts.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reactance",
+                "frequency"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetPulsePoint": {
+            "title": "DatasheetPulsePoint",
+            "description": "Maximum pulse current vs. pulse length point from the datasheet.",
+            "type": "object",
+            "properties": {
+                "pulseCurrent": {
+                    "description": "Pulse current value in Amperes.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "pulseLength": {
+                    "description": "Pulse length in seconds.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "winding": {
+                    "description": "Winding / array element this point applies to (e.g. element of a bead array). Omit for single-winding parts.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "pulseCurrent",
+                "pulseLength"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetNumberPulsesPoint": {
+            "title": "DatasheetNumberPulsesPoint",
+            "description": "Number of pulses vs. maximum pulse current point from the datasheet.",
+            "type": "object",
+            "properties": {
+                "numberPulses": {
+                    "description": "Number of pulses.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "pulseCurrent": {
+                    "description": "Pulse current value in Amperes.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "winding": {
+                    "description": "Winding / array element this point applies to (e.g. element of a bead array). Omit for single-winding parts.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "numberPulses",
+                "pulseCurrent"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetInductorElectrical": {
+            "title": "MagneticDatasheetInductorElectrical",
+            "description": "Datasheet electrical characteristics of a single-winding inductor.",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "inductor"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '4 x current compensated', '4 turns'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Effective number of turns for this connection configuration.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "inductance": {
+                    "description": "Inductance in Henries, with tolerance.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "dcResistance": {
+                    "description": "DC resistance in Ohms. nominal = typical value, maximum = datasheet max.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current, as a single-entry array.",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion. Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "saturationCurrentPeak": {
+                    "description": "Peak saturation current in Amperes (I_sat from datasheet). A single unqualified I_sat; when the datasheet states I_sat at explicit inductance-drop criteria, use saturationCurrents instead (or in addition).",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "saturationCurrents": {
+                    "description": "Saturation-current table: I_sat at one or more inductance-drop criteria (|dL/L| %), when the datasheet specifies them. Preferred over the single saturationCurrentPeak scalar because it carries the roll-off basis, enabling apples-to-apples cross-manufacturer comparison. Omit for a part whose datasheet gives only one unqualified I_sat.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetSaturationCurrent"
+                    }
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "impedancePoints": {
+                    "description": "Impedance vs. frequency points (RF / high-frequency inductors).",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetImpedancePoint"
+                    }
+                },
+                "inductancePoints": {
+                    "description": "Inductance vs. DC-bias current points (inductance roll-off / saturation curve), optionally per temperature.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetInductancePoint"
+                    }
+                },
+                "maximumImpedance": {
+                    "description": "Peak / maximum impedance magnitude in Ohms.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetCoupledInductorElectrical": {
+            "title": "MagneticDatasheetCoupledInductorElectrical",
+            "description": "Datasheet electrical characteristics of a multi-winding coupled inductor.",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "coupledInductor"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '4 x current compensated', '4 turns'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Effective number of turns for this connection configuration.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "inductance": {
+                    "description": "Inductance per winding in Henries, with tolerance.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "dcResistances": {
+                    "description": "DC resistance per winding.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                    }
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current per winding (one entry per winding; a single-entry array for a single rated value).",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion. Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "saturationCurrentPeak": {
+                    "description": "Peak saturation current in Amperes (I_sat from datasheet). A single unqualified I_sat; when the datasheet states I_sat at explicit inductance-drop criteria, use saturationCurrents instead (or in addition).",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "saturationCurrents": {
+                    "description": "Saturation-current table: I_sat at one or more inductance-drop criteria (|dL/L| %), when the datasheet specifies them. Preferred over the single saturationCurrentPeak scalar because it carries the roll-off basis, enabling apples-to-apples cross-manufacturer comparison. Omit for a part whose datasheet gives only one unqualified I_sat.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetSaturationCurrent"
+                    }
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "turnsRatios": {
+                    "description": "Turns ratios between the primary and each other winding (primary turns / winding turns), one entry per secondary. Uses the same array-of-dimensionWithTolerance shape as designRequirements.turnsRatios.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                    },
+                    "minItems": 0
+                },
+                "couplingCoefficient": {
+                    "description": "Magnetic coupling coefficient k (0-1).",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "leakageInductance": {
+                    "description": "Leakage inductance in Henries.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetTransformerElectrical": {
+            "title": "MagneticDatasheetTransformerElectrical",
+            "description": "Datasheet electrical characteristics of a transformer.",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "transformer"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '4 x current compensated', '4 turns'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Effective number of turns for this connection configuration.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "inductance": {
+                    "description": "Magnetizing inductance in Henries, with tolerance.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "dcResistances": {
+                    "description": "DC resistance per winding.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                    }
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current per winding (one entry per winding; a single-entry array for a single rated value).",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion. Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "ratedVoltageDC": {
+                    "description": "Maximum rated DC voltage between any two terminals in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "ratedVoltageAC": {
+                    "description": "Maximum rated AC voltage (RMS) between windings in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "insulationTestVoltageAC": {
+                    "description": "Hi-pot / dielectric withstand test voltage (AC RMS) in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "insulationResistance": {
+                    "description": "Minimum insulation resistance between windings in Ohms.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "leakageInductance": {
+                    "description": "Leakage inductance in Henries.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "turnsRatios": {
+                    "description": "Turns ratios between the primary and each other winding (primary turns / winding turns), one entry per secondary. Uses the same array-of-dimensionWithTolerance shape as designRequirements.turnsRatios.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                    },
+                    "minItems": 0
+                },
+                "couplingCoefficient": {
+                    "description": "Magnetic coupling coefficient k (0-1).",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetCommonModeChokeElectrical": {
+            "title": "MagneticDatasheetCommonModeChokeElectrical",
+            "description": "Datasheet electrical characteristics of a common-mode choke.",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "commonModeChoke"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '4 x current compensated', '4 turns'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Effective number of turns for this connection configuration.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "dcResistances": {
+                    "description": "DC resistance per line / winding.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                    }
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current per line (one entry per line; a single-entry array for a single rated value).",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "saturationCurrentPeak": {
+                    "description": "Peak saturation current in Amperes (I_sat from datasheet). For a current-compensated common-mode choke this is the bias (differential/unbalance) current at which the core saturates, as specified by the manufacturer.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion. Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "ratedVoltageDC": {
+                    "description": "Maximum rated DC voltage between any two terminals in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "ratedVoltageAC": {
+                    "description": "Maximum rated AC voltage (RMS) between windings in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "insulationTestVoltageAC": {
+                    "description": "Hi-pot / dielectric withstand test voltage (AC RMS) in Volts.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "insulationResistance": {
+                    "description": "Minimum insulation resistance between windings in Ohms.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "inductance": {
+                    "description": "Rated common-mode inductance in Henries (the per-line inductance presented to common-mode current). Datasheet-specified for common-mode chokes; distinct from leakageInductance (the differential-mode term).",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "leakageInductance": {
+                    "description": "Differential-mode (leakage) inductance in Henries.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "impedancePoints": {
+                    "description": "Common-mode impedance vs. frequency points.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetImpedancePoint"
+                    }
+                },
+                "commonModeFilter": {
+                    "description": "Common-mode filter performance figures from the datasheet.",
+                    "$ref": "#/$defs/magneticDatasheetCommonModeFilter"
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetChipBeadElectrical": {
+            "title": "MagneticDatasheetChipBeadElectrical",
+            "description": "Datasheet electrical characteristics of a chip bead (ferrite bead).",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "chipBead"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '4 x current compensated', '4 turns'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Effective number of turns for this connection configuration.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "dcResistance": {
+                    "description": "DC resistance in Ohms. nominal = typical value, maximum = datasheet max.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current per element (one entry per element of a bead array; a single-entry array for a single bead).",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion (per element for a bead array). Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison — bead vendors rate '1 A' anywhere from a 10 K to a 40 K rise. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "impedancePoints": {
+                    "description": "Impedance vs. frequency points, optionally parameterised by DC bias current.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetImpedancePoint"
+                    }
+                },
+                "resistancePoints": {
+                    "description": "Resistance vs. frequency points, optionally parameterised by DC bias current.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetResistancePoint"
+                    }
+                },
+                "reactancePoints": {
+                    "description": "Reactance vs. frequency points, optionally parameterised by DC bias current.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetReactancePoint"
+                    }
+                },
+                "pulsePoints": {
+                    "description": "Maximum pulse current vs. pulse length points.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetPulsePoint"
+                    }
+                },
+                "numberPulsesPoints": {
+                    "description": "Number of pulses vs. maximum pulse current points.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetNumberPulsesPoint"
+                    }
+                },
+                "impedanceTolerance": {
+                    "description": "Tolerance on the impedance values, expressed as a percentage (e.g. 20 means +/-20%).",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetCableCoreElectrical": {
+            "title": "MagneticDatasheetCableCoreElectrical",
+            "description": "Datasheet electrical characteristics of a clamp-on / cable ferrite core (a 1-port common-mode suppression core the cable is threaded through: clip-on ferrites, cable rings, split/snap-on cores). Electrically a 1-port impedance like a chip bead, but a distinct part class — retrofit/threaded onto a cable rather than reflow-soldered. Per the array-of-configurations idiom, a datasheet that publishes |Z| for several pass counts contributes one entry per pass count, discriminated by numberTurns; the toroid/ring geometry (inner/outer diameter, height) and ferrite material live in the shared core description, not here.",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this electrical variant.",
+                    "const": "cableCore"
+                },
+                "name": {
+                    "description": "Label of this connection configuration as given in the datasheet (e.g. '1 turn', '2 turns', 'single pass'). Omit for a part with a single configuration.",
+                    "type": "string"
+                },
+                "numberTurns": {
+                    "description": "Number of cable passes through the core for this configuration's |Z| curve (1 = single pass). Datasheets that tabulate 1/2/3-turn impedance contribute one electrical entry per turn count.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "dcResistance": {
+                    "description": "DC resistance of the threaded conductor in Ohms (usually negligible; present when the datasheet states it). nominal = typical value, maximum = datasheet max.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "ratedCurrents": {
+                    "description": "Rated DC current in Amperes (one entry per conductor; a single-entry array for a single cable). Above this the core's impedance derates through partial saturation.",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "ratedCurrentPoints": {
+                    "description": "Rated-current table qualified by temperature-rise criterion. Preferred over the bare ratedCurrents array because it carries the ΔT basis, enabling apples-to-apples cross-manufacturer comparison. Omit when the datasheet states only an unqualified rating.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetRatedCurrent"
+                    }
+                },
+                "impedancePoints": {
+                    "description": "Common-mode impedance vs. frequency points for this pass count, optionally parameterised by DC bias current (impedancePoint.current) for the bias-derating curve.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/magneticDatasheetImpedancePoint"
+                    }
+                },
+                "impedanceTolerance": {
+                    "description": "Tolerance on the impedance values, expressed as a percentage (e.g. 25 means +/-25%).",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                "selfResonantFrequency": {
+                    "description": "Self-resonant frequency in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "mountingForm": {
+                    "description": "How the core is fitted to the cable: a closed 'solidRing' the cable is threaded through at build, a hinged 'snapOn' clip that opens for retrofit, a two-piece 'split' core, or a 'screwable' housing. Distinguishes retrofit-installable clamps from build-time rings.",
+                    "type": "string",
+                    "enum": ["solidRing", "snapOn", "split", "screwable"]
+                },
+                "maximumCableOuterDiameter": {
+                    "description": "Largest cable / bundle outer diameter in metres that fits through the core (the inner-diameter fit limit) — a primary selection parameter for a cable core.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "subtype"
+            ],
+            "additionalProperties": false
+        },
+        "magneticDatasheetApplication": {
+            "title": "MagneticDatasheetApplication",
+            "description": "Application parameters published by the manufacturer in the datasheet. These describe the circuit the component was designed for, not the component's intrinsic electrical properties.",
+            "type": "object",
+            "properties": {
+                "switchingFrequency": {
+                    "description": "Nominal switching frequency in Hz for which this component is designed.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "inputVoltage": {
+                    "description": "Input voltage range for which this component is designed, in Volts.",
+                    "$ref": "./utils.json#/$defs/dimension"
+                },
+                "outputVoltages": {
+                    "description": "Output voltages per secondary winding in Volts.",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "outputCurrents": {
+                    "description": "Output currents per secondary winding in Amperes.",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "auxiliaryVoltage": {
+                    "description": "Auxiliary winding voltage in Volts.",
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetCommonModeFilter": {
+            "description": "Common-mode filter performance figures.",
+            "type": "object",
+            "properties": {
+                "cutOffFrequency": {
+                    "description": "-3 dB cut-off frequency of the common-mode filter in Hz.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "attenuation": {
+                    "description": "Common-mode insertion-loss / attenuation value from the datasheet in dB.",
+                    "type": "number"
+                },
+                "attenuationTestCondition": {
+                    "description": "Test condition string for the attenuation figure (e.g. '100 MHz, 50 Ω').",
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetThermal": {
+            "description": "Operating temperature range.",
+            "type": "object",
+            "properties": {
+                "operatingTemperature": {
+                    "description": "Operating temperature in degrees Celsius.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "temperatureRise": {
+                    "description": "Maximum temperature rise above ambient. Unit: K (numerically equivalent to a Celsius difference).",
+                    "type": "number"
+                },
+                "thermalResistance": {
+                    "description": "Thermal resistance. Unit: K/W (numerically equivalent to °C/W).",
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetMechanical": {
+            "description": "Physical dimensions and mounting style.",
+            "type": "object",
+            "properties": {
+                "length": {
+                    "description": "Body length in metres.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "width": {
+                    "description": "Body width in metres.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "height": {
+                    "description": "Body height in metres.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "diameter": {
+                    "description": "Body diameter in metres (for cylindrical parts).",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "mounting": {
+                    "description": "PCB mounting style. Uses the same connectionType enum as designRequirements.terminalType.",
+                    "$ref": "./utils.json#/$defs/connectionType"
+                },
+                "assemblyType": {
+                    "description": "Assembly type (e.g. 'SMT', 'Through-hole').",
+                    "type": "string"
+                },
+                "pinLength": {
+                    "description": "Pin length in metres.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                },
+                "weight": {
+                    "description": "Body weight in kilograms.",
+                    "$ref": "./utils.json#/$defs/dimensionWithTolerance"
+                }
+            },
+            "additionalProperties": false
+        },
+        "magneticDatasheetChipBeadModel": {
+            "title": "MagneticDatasheetChipBeadModel",
+            "description": "Circuit model parameters for SPICE simulation of chip beads (series R in series with a parallel R-L-C).",
+            "type": "object",
+            "properties": {
+                "subtype": {
+                    "description": "Discriminator selecting this model variant.",
+                    "const": "chipBead"
+                },
+                "rs": {
+                    "description": "Series resistance in Ohms",
+                    "type": "number"
+                },
+                "rp": {
+                    "description": "Parallel resistance in Ohms",
+                    "type": "number"
+                },
+                "cp": {
+                    "description": "Parallel capacitance in Farads",
+                    "type": "number"
+                },
+                "lp": {
+                    "description": "Parallel inductance in Henries",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "subtype",
+                "rp",
+                "cp",
+                "lp"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

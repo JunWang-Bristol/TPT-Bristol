@@ -36,6 +36,21 @@ class BoardsTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        # These tests fuzz OVP limits, source voltages and output states with random
+        # values.  Leaving them that way silently breaks the next measurement run:
+        # an OVP left below the target rail makes set_source_voltage() a no-op, so
+        # the rail sits at 0 V and the half-bridge never switches — which looks
+        # exactly like a hardware fault.  Restore a predictable state.
+        try:
+            channels = cls.psut.get_available_channels()
+            cls.psut.disable_all_outputs()
+            for channel in channels:
+                cls.psut.disable_output(channel)
+                cls.psut.set_voltage_limit(channel, cls.psut.get_maximum_source_voltage(channel))
+            cls.psut.set_all_source_voltages([0] * len(channels))
+            print("  PSU restored: outputs off, voltages 0 V, OVP at maximum")
+        except Exception as exception:
+            print(f"  WARNING: could not restore PSU state: {exception}")
         print(f"\nFinishing tests for {cls.configuration['power_supply']}")
 
     def test_version(self):

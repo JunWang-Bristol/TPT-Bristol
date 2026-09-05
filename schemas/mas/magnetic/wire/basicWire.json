@@ -1,0 +1,70 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://psma.com/mas/magnetic/wire/basicWire.json",
+    "$comment": "SPDX-License-Identifier: Apache-2.0",
+    "title": "wire/basicWire",
+    "description": "The description of a basic magnet wire",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "The name of wire",
+            "type": "string"
+        },
+        "type": {
+            "$ref": "../wire.json#/$defs/wireType"
+        },
+        "standard": {
+            "description": "The standard of wire",
+            "title": "wireStandard",
+            "type": "string",
+            "enum": [
+                "IEC 60317",
+                "NEMA MW 1000 C",
+                "IPC-6012"
+            ]
+        },
+        "standardName": {
+            "description": "Name according to the standard of wire",
+            "type": "string"
+        },
+        "manufacturerInfo": {
+            "$ref": "https://psma.com/peas/utils.json#/$defs/manufacturerInfo"
+        },
+        "conductingArea": {
+            "description": "The conducting area of the wire, in m². Used for some rectangular shapes where the area is smaller than expected due to rounded corners",
+            "$ref": "../../utils.json#/$defs/dimensionWithTolerance"
+        },
+        "numberConductors": {
+            "description": "The number of conductors in the wire",
+            "type": "integer"
+        },
+        "material": {
+            "title": "WireMaterialDataOrNameUnion",
+            "oneOf": [
+                {
+                    "$ref": "./material.json"
+                },
+                {
+                    "description": "The name of the material used in the wire",
+                    "type": "string"
+                }
+            ]
+        },
+        "coating": {
+            "title": "CoatingDataOrNameUnion",
+            "oneOf": [
+                {
+                    "$ref": "../insulation/wireCoating.json"
+                },
+                {
+                    "description": "The name of the coating used in the wire",
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "type"
+    ],
+    "$defs": {}
+}
